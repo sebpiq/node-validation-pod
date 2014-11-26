@@ -1,0 +1,23 @@
+{
+  "name": "validation-shell",
+  "version": "0.0.0",
+  "description": "A minimal library for sync/async validation. Doesn't implement any validation primitives.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:sebpiq/node-validation-shell.git"
+  },
+  "keywords": [
+    "validation",
+    "chai"
+  ],
+  "author": "Sébastien Piquemal <sebpiq@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sebpiq/node-validation-shell/issues"
+  },
+  "homepage": "https://github.com/sebpiq/node-validation-shell"
+}
