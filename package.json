@@ -1,5 +1,5 @@
 {
-  "name": "validation-shell",
+  "name": "validation-pod",
   "version": "0.0.0",
   "description": "A minimal library for sync/async validation. Doesn't implement any validation primitives.",
   "main": "index.js",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:sebpiq/node-validation-shell.git"
+    "url": "git@github.com:sebpiq/node-validation-pod.git"
   },
   "keywords": [
     "validation",
@@ -22,7 +22,7 @@
   "author": "Sébastien Piquemal <sebpiq@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/sebpiq/node-validation-shell/issues"
+    "url": "https://github.com/sebpiq/node-validation-pod/issues"
   },
-  "homepage": "https://github.com/sebpiq/node-validation-shell"
+  "homepage": "https://github.com/sebpiq/node-validation-pod"
 }

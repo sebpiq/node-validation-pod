@@ -4,7 +4,7 @@ var assert = require('assert')
   , expect = chai.expect
   , validationShell = require('./index')
 
-describe('validation-shell', function() {
+describe('validation-pod', function() {
 
   describe('validate', function() {
 
