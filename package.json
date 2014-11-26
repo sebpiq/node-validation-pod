@@ -3,8 +3,13 @@
   "version": "0.0.0",
   "description": "A minimal library for sync/async validation. Doesn't implement any validation primitives.",
   "main": "index.js",
+  "dependencies": {
+    "underscore": "1.7.x",
+    "chai": "1.10.x",
+    "async": "0.9.x"
+  },
   "scripts": {
-    "test": "mocha --recursive"
+    "test": "mocha tests.js"
   },
   "repository": {
     "type": "git",
