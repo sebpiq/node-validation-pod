@@ -15,12 +15,26 @@ _.extend(Validator.prototype, {
   handleError: function(err) {},
 
   run: function(obj, opts, done) {
+    // Handling variable number of arguments and options
+    var defaults = {validationErrors: {}, prefix: null}
+    if (arguments.length === 3)
+      _.defaults(opts, defaults)
+    else if (arguments.length === 2) {
+      done = opts
+      opts = defaults
+    } else throw new Error('unvalid arguments')
+
+    var self = this
+      , attrNames = _.keys(this.validators)
+      , validationErrors = opts.validationErrors
+      , prefix = opts.prefix
+      , isValid = true
 
     var _doFinally = function() {
       // Check for unknown attributes
       var unknownAttrs = _.difference(_.keys(obj), _.keys(self.validators))
       if (unknownAttrs.length)
-        validationErrors[prefix] = 'unknown attributes [' + unknownAttrs.join(', ') + ']'
+        validationErrors[prefix || '.'] = 'unknown attributes [' + unknownAttrs.join(', ') + ']'
 
       // Run the `after` hook only if there is no validation error.
       if (isValid && self.after) {
@@ -37,26 +51,11 @@ _.extend(Validator.prototype, {
       var returned = self.handleError(err)
       if (!returned) return false
       else {
-        validationErrors[prefix] = returned
+        validationErrors[prefix || '.'] = returned
         isValid = false
         return true
       }
     }
-
-    // Handling variable number of arguments and options
-    var defaults = {validationErrors: {}, prefix: ''}
-    if (arguments.length === 3)
-      _.defaults(opts, defaults)
-    else if (arguments.length === 2) {
-      done = opts
-      opts = defaults
-    } else throw new Error('unvalid arguments')
-
-    var self = this
-      , attrNames = _.keys(this.validators)
-      , validationErrors = opts.validationErrors
-      , prefix = opts.prefix
-      , isValid = true
 
     // Run the `before` hook
     if (this.before) {
@@ -76,7 +75,7 @@ _.extend(Validator.prototype, {
       if (err) return done(err)
       _.forEach(_.zip(attrNames, results), function(p) {
         if (p[1]) {
-          validationErrors[prefix + '.' + p[0]] = p[1]
+          validationErrors[(prefix || '') + '.' + p[0]] = p[1]
           isValid = false
         }
       })

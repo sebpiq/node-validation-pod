@@ -5,8 +5,11 @@
   "main": "index.js",
   "dependencies": {
     "underscore": "1.7.x",
-    "chai": "1.10.x",
     "async": "0.9.x"
+  },
+  "devDependencies": {
+    "chai": "1.10.x",
+    "mocha": "1.18.x"
   },
   "scripts": {
     "test": "mocha tests.js"

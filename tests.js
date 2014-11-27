@@ -95,16 +95,15 @@ describe('validation-pod', function() {
     it('should return a validation error if unknown fields', function(done) {
       var validationErrors = {}
         , obj = {attr1: 'bla', unknown1: 1234, unknown2: 5678}
-        , opts = {prefix: 'root'}
 
       var validator = new ChaiValidator({
         attr1: function(val) {},
         attr2: function(val) {}
       })
 
-      validator.run(obj, opts, function(err, obj2, validationErrors) {
+      validator.run(obj, function(err, obj2, validationErrors) {
         assert.ok(obj === obj2)
-        assert.deepEqual(_.keys(validationErrors), ['root'])
+        assert.deepEqual(_.keys(validationErrors), ['.'])
         done()
       })
     })
