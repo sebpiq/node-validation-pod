@@ -11,7 +11,7 @@ The validation logic
 
 Implements 3 steps :
 
-1. **before** : prepare your data for validation. If some fields validity depend on each other, you can check it here. If a validation error occurs, stop the validation process here.
+1. **before** : prepare your data for validation. If some fields validity depend on each other, you can check it here. If a validation error occurs, go directly to `after` step.
 2. **attributes validators** : for each attribute in your object, run the corresponding validator. Gathers all errors in one object.
 3. **after** : check for unknown attributes. Add errors to the errors found in previous step.
 
@@ -27,7 +27,7 @@ var chai = require('chai')
   , inherits = require('util').inherits
 
 var ChaiValidator = function() {
-  vpod.Validator.apply()
+  vpod.Validator.apply(this, arguments)
 }
 
 inherits(ChaiValidator, vpod.Validator)
