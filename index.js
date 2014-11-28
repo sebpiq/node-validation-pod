@@ -12,7 +12,11 @@ var Validator = exports.Validator = function(validators, beforeAfter) {
 
 _.extend(Validator.prototype, {
 
-  handleError: function(err) {},
+  // !!! Subclasses must implement this.
+  // If `err` is a validation error and should be handled gracefully,
+  // this should return a message.
+  // Otherwise, this should return `false` or nothing, and `err` will be thrown. 
+  //handleError: function(err) {},
 
   run: function(obj, opts, done) {
     // Handling variable number of arguments and options
@@ -41,7 +45,7 @@ _.extend(Validator.prototype, {
         try {
           self.after.call(obj)
         } catch (err) {
-          if(!self._handleError(err)) return done(err)
+          if(!_handleError(err)) return done(err)
         }
       }
       done(null, obj, validationErrors)
@@ -62,7 +66,7 @@ _.extend(Validator.prototype, {
       try {
         this.before.call(obj)
       } catch (err) {
-        if (this._handleError(err)) _doFinally()
+        if (_handleError(err)) _doFinally()
         else done(err)
         return
       }
