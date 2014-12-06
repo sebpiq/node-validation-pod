@@ -80,7 +80,7 @@ var aDog = {
   pictureFolder: '/tmp'
 }
 
-animalValidator.run(aDog, function(err, animal, validationErrors) {
+animalValidator.run(aDog, function(err, validationErrors) {
   if (err) throw err // this is real errors coming here.
   console.log(validationErrors) // -> {}
 })
@@ -96,7 +96,7 @@ var anotherDog = {
   unknownAttribute: '???'
 }
 
-animalValidator.run(anotherDog, function(err, animal, validationErrors) {
+animalValidator.run(anotherDog, function(err, validationErrors) {
   if (err) throw err // this is real errors coming here.
   console.log(validationErrors) // -> {'.color': 'expected ...', '.': 'unknownAttribute': '...', ...}
 })

@@ -1,3 +1,6 @@
+var isObject = require('lodash.isobject')
+  , isString = require('lodash.isstring')
+
 var Validator = exports.Validator = function(validators, beforeAfter) {
   this.validators = validators
   beforeAfter = beforeAfter || {}
@@ -37,7 +40,8 @@ Validator.prototype.run =  function(obj, opts, done) {
         unknownAttrs.push(key)
     }
     if (unknownAttrs.length)
-      validationErrors[prefix || '.'] = 'unknown attributes [' + unknownAttrs.join(', ') + ']'
+      self._merge(validationErrors, 'unknown attributes [' + unknownAttrs.join(', ') + ']', prefix)
+      //validationErrors[prefix || '.'] = 'unknown attributes [' + unknownAttrs.join(', ') + ']'
 
     // Run the `after` hook only if there is no validation error.
     if (isValid && self.after) {
@@ -47,14 +51,14 @@ Validator.prototype.run =  function(obj, opts, done) {
         if(!_handleError(err)) return done(err)
       }
     }
-    done(null, obj, validationErrors)
+    done(null, validationErrors)
   }
 
   var _handleError = function(err) {
-    var returned = self.handleError(err)
-    if (!returned) return false
-    else {
-      validationErrors[prefix || '.'] = returned
+    var vError = self.handleError(err)
+    if (!vError) return false
+    else { 
+      self._merge(validationErrors, vError, prefix)
       isValid = false
       return true
     }
@@ -72,18 +76,20 @@ Validator.prototype.run =  function(obj, opts, done) {
   }
 
   // Run validators for all attributes, and collect validation errors
-  var _asyncValidCb = function(attrName) {
+  var _attrValidationCb = function(attrName) {
     return function(err, validationErrMsg) {
       ranCount++
       if (returned) return
 
+      // If error, return, and set `returned` to true.
       if (err) {
         returned = true
         return done(err)
       }
 
+      // Add the validation error to the object `validationErrors`
       if (validationErrMsg) {
-        validationErrors[(prefix || '') + '.' + attrName] = validationErrMsg
+        self._merge(validationErrors, validationErrMsg, (prefix || '') + '.' + attrName)
         isValid = false
       }
 
@@ -92,7 +98,7 @@ Validator.prototype.run =  function(obj, opts, done) {
   }, ranCount = 0, returned = false
 
   for (var i = 0, length = attrNames.length; i < length; i++)
-    self.validate(obj, attrNames[i], _asyncValidCb(attrNames[i]))
+    self.validate(obj, attrNames[i], _attrValidationCb(attrNames[i]))
 }
 
 // Validates `attrName` of `obj` and calls `done(err, validationErrMsg)` is called.
@@ -111,7 +117,7 @@ Validator.prototype.validate = function(obj, attrName, done) {
     if (!returned) done(err)
     else done(null, returned)
   }
-
+  
   // Both async and sync validation, in case calling the function directly throws an error.
   // For asynchronous validation, errors are returned as the first argument of the callback.
   if (validator.length === 2) {
@@ -124,4 +130,15 @@ Validator.prototype.validate = function(obj, attrName, done) {
     catch (err) { return _handleError(err) }
     done()
   }
+}
+
+Validator.prototype._merge = function(allValidationErrors, newValidationError, prefix) {
+  if (isString(newValidationError))
+    allValidationErrors[prefix || '.'] = newValidationError
+  
+  else if (isObject(newValidationError)) {
+    for (var key in newValidationError)
+      allValidationErrors[(prefix || '.') + key] = newValidationError[key]
+
+  } else throw new Error('unvalid handleError return : ' + returned)
 }

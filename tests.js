@@ -83,10 +83,9 @@ describe('validation-pod', function() {
         attr2: function(val, done) { done(new chai.AssertionError('dummy')) }
       })
 
-      validator.run(obj, opts, function(err, obj2, validationErrors2) {
+      validator.run(obj, opts, function(err, validationErrors2) {
         if (err) throw err
         assert.deepEqual(_.keys(validationErrors), ['root.attr1', 'root.attr2'])
-        assert.ok(obj === obj2)
         assert.ok(validationErrors === validationErrors2)
         done()
       })
@@ -115,8 +114,7 @@ describe('validation-pod', function() {
         attr2: function(val) {}
       })
 
-      validator.run(obj, function(err, obj2, validationErrors) {
-        assert.ok(obj === obj2)
+      validator.run(obj, function(err, validationErrors) {
         assert.deepEqual(_.keys(validationErrors), ['.'])
         done()
       })
@@ -133,7 +131,7 @@ describe('validation-pod', function() {
         }
       })
 
-      validator.run(obj, function(err, obj2, validationErrors) {
+      validator.run(obj, function(err, validationErrors) {
         if (err) throw err
         assert.deepEqual(obj, {'attr1': 'blabla'})
         done()
@@ -152,7 +150,7 @@ describe('validation-pod', function() {
         }
       })
 
-      validator.run(obj, function(err, obj2, validationErrors) {
+      validator.run(obj, function(err, validationErrors) {
         if (err) throw err
         assert.deepEqual(obj, {'attr1': 'blabla'})
         assert.deepEqual(validationErrors, {'.': 'BLA' + obj.attr1})
@@ -169,7 +167,7 @@ describe('validation-pod', function() {
         before: function() { throw new Error('not good') }
       })
 
-      validator.run(obj, function(err, obj2, validationErrors) {
+      validator.run(obj, function(err, validationErrors) {
         assert.ok(err)
         assert.equal(err.message, 'not good')
         done()
@@ -187,7 +185,7 @@ describe('validation-pod', function() {
         }
       })
 
-      validator.run(obj, function(err, obj2, validationErrors) {
+      validator.run(obj, function(err, validationErrors) {
         if (err) throw err
         assert.deepEqual(validationErrors, {'.': 'RIGHT' + obj.attr1})
         done()
@@ -203,9 +201,39 @@ describe('validation-pod', function() {
         after: function() { throw new Error('not good') }
       })
 
-      validator.run(obj, function(err, obj2, validationErrors) {
+      validator.run(obj, function(err, validationErrors) {
         assert.ok(err)
         assert.equal(err.message, 'not good')
+        done()
+      })
+    })
+
+    it('should merge validation errors from nested validators', function(done) {
+      var validationErrors = {}
+        , obj = {attr1: {}, attr2: 1234}
+
+      var attr1Validator = new ChaiValidator({
+        a: function(val) { expect(val).to.be.a('number') },
+        b: function(val) { expect(val).to.be.a('number') },
+        c: function(val) {}
+      })
+
+      var composedValidator = new ChaiValidator({
+        attr1: function(val, done) {
+          expect(val).to.be.an('object')
+          attr1Validator.run(val, {prefix: ''}, function(err, validationErrors) {
+            if (err) return done(err)
+            if (Object.keys(validationErrors).length)
+              return done(new chai.AssertionError(validationErrors))
+            else done()
+          })
+        },
+        attr2: function(val) {},
+        attr3: function(val) { expect(val).to.be.a('number') }
+      })
+
+      composedValidator.run(obj, function(err, validationErrors) {
+        assert.deepEqual(_.keys(validationErrors), ['.attr1.a', '.attr1.b', '.attr3'])
         done()
       })
     })
