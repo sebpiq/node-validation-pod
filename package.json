@@ -4,7 +4,6 @@
   "description": "A minimal library for sync/async validation. Doesn't implement any validation primitives.",
   "main": "index.js",
   "dependencies": {
-    "underscore": "1.7.x",
     "async": "0.9.x"
   },
   "devDependencies": {
