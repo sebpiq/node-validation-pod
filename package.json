@@ -3,6 +3,10 @@
   "version": "0.2.0",
   "description": "A minimal library for sync/async validation. Doesn't implement any validation primitives.",
   "main": "index.js",
+  "dependencies": {
+    "lodash.isstring": "2.4.x",
+    "lodash.isobject": "2.4.x"
+  },
   "devDependencies": {
     "chai": "1.10.x",
     "mocha": "1.18.x",
@@ -24,9 +28,5 @@
   "bugs": {
     "url": "https://github.com/sebpiq/node-validation-pod/issues"
   },
-  "homepage": "https://github.com/sebpiq/node-validation-pod",
-  "dependencies": {
-    "lodash.isstring": "^2.4.1",
-    "lodash.isobject": "^2.4.1"
-  }
+  "homepage": "https://github.com/sebpiq/node-validation-pod"
 }
