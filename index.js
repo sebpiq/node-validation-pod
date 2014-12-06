@@ -55,10 +55,10 @@ Validator.prototype.run =  function(obj, opts, done) {
   }
 
   var _handleError = function(err) {
-    var vError = self.handleError(err)
-    if (!vError) return false
+    var validationError = self.handleError(err)
+    if (!validationError) return false
     else { 
-      self._merge(validationErrors, vError, prefix)
+      self._merge(validationErrors, validationError, prefix)
       isValid = false
       return true
     }
@@ -107,15 +107,16 @@ Validator.prototype.validate = function(obj, attrName, done) {
     , val = obj[attrName]
     , validator = this.validators[attrName]
 
-  var _asyncCb = function(err) {
+  var _asyncCb = function(err, validationError) {
     if (err) _handleError(err)
+    else if (validationError) done(null, validationError)
     else done()
   }
 
   var _handleError = function(err) {
-    var returned = self.handleError(err)
-    if (!returned) done(err)
-    else done(null, returned)
+    var validationError = self.handleError(err)
+    if (!validationError) done(err)
+    else done(null, validationError)
   }
   
   // Both async and sync validation, in case calling the function directly throws an error.

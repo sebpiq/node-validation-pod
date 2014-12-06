@@ -221,12 +221,7 @@ describe('validation-pod', function() {
       var composedValidator = new ChaiValidator({
         attr1: function(val, done) {
           expect(val).to.be.an('object')
-          attr1Validator.run(val, {prefix: ''}, function(err, validationErrors) {
-            if (err) return done(err)
-            if (Object.keys(validationErrors).length)
-              return done(new chai.AssertionError(validationErrors))
-            else done()
-          })
+          attr1Validator.run(val, done)
         },
         attr2: function(val) {},
         attr3: function(val) { expect(val).to.be.a('number') }
