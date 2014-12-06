@@ -214,7 +214,7 @@ describe('validation-pod', function() {
       var validator = new ChaiValidator({})
       assert.throws(function() { validator.run() })
       assert.throws(function() { validator.run(1) })
-      assert.throws(function() { validator.run(1, 2, 3) })
+      assert.throws(function() { validator.run(1, 2, 3, 4) })
     })
 
   })

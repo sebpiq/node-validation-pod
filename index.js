@@ -1,6 +1,3 @@
-var async = require('async')
-
-
 var Validator = exports.Validator = function(validators, beforeAfter) {
   this.validators = validators
   beforeAfter = beforeAfter || {}
@@ -75,24 +72,27 @@ Validator.prototype.run =  function(obj, opts, done) {
   }
 
   // Run validators for all attributes, and collect validation errors
-  var asyncValidOps = []
-  for (var i = 0, length = attrNames.length; i < length; i++) {
-    asyncValidOps.push((function(attrName) {
-      return function(next) { self.validate(obj, attrName, next) }
-    })(attrNames[i]))
-  }
-  
-  async.series(asyncValidOps, function(err, results) {
-    if (err) return done(err)
-    for (var i = 0, length = attrNames.length; i < length; i++) {
-      if (results[i]) {
-        validationErrors[(prefix || '') + '.' + attrNames[i]] = results[i]
+  var _asyncValidCb = function(attrName) {
+    return function(err, validationErrMsg) {
+      ranCount++
+      if (returned) return
+
+      if (err) {
+        returned = true
+        return done(err)
+      }
+
+      if (validationErrMsg) {
+        validationErrors[(prefix || '') + '.' + attrName] = validationErrMsg
         isValid = false
       }
-    }
-    _doFinally()
-  })
 
+      if (ranCount === attrNames.length) _doFinally()
+    }
+  }, ranCount = 0, returned = false
+
+  for (var i = 0, length = attrNames.length; i < length; i++)
+    self.validate(obj, attrNames[i], _asyncValidCb(attrNames[i]))
 }
 
 // Validates `attrName` of `obj` and calls `done(err, validationErrMsg)` is called.
