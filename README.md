@@ -25,7 +25,7 @@ Here is a simple example on how to use **validator.js** to validate the data sub
 var chai = require('validator')
   , vpod = require('validation-pod')
 
-userRegisterValidator = vpod.Validator({
+userRegisterValidator = new vpod.Validator({
   email: function(val) { 
     if (!validator.isEmail(val)) return 'Invalid email' 
   },
