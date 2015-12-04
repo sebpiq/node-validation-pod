@@ -8,12 +8,10 @@ var Validator = exports.Validator = function(validators, beforeAfter) {
   this.after = beforeAfter.after
 }
 
-// !!! Subclasses must implement:
-// `Validator.handleError(err)`.
 // If `err` is a validation error and should be handled gracefully,
-// this should return a message.
-// Otherwise, this should return `false` or nothing, and `err` will be thrown. 
-
+// this should return a string corresponding to the validation error.
+// Otherwise, this should return `false` or nothing, and `err` will be thrown or bubbled up. 
+Validator.prototype.handleError = function(err) {}
 
 Validator.prototype.run =  function(obj, opts, done) {
   // Handling variable number of arguments and options
@@ -32,10 +30,22 @@ Validator.prototype.run =  function(obj, opts, done) {
     , prefix = opts.prefix
     , isValid = true
 
-  var _doFinally = function() {
+  // Returns true if `err` was handled as a validation error, false otherwise
+  var _handleError = function(err) {
+    var validationErrMsg = self.handleError(err)
+    if (!validationErrMsg) return false
+    else { 
+      self._merge(validationErrors, validationErrMsg, prefix)
+      isValid = false
+      return true
+    }
+  }
+
+  // ====== (step III) ====== Final validations, run the `after` hook, etc ...
+  var _runAfter = function() {
     // Check for unknown attributes
-    var unknownAttrs = []
-    for (var key in obj) {
+    var key, unknownAttrs = []
+    for (key in obj) {
       if (!self.validators.hasOwnProperty(key))
         unknownAttrs.push(key)
     }
@@ -54,28 +64,18 @@ Validator.prototype.run =  function(obj, opts, done) {
     done(null, validationErrors)
   }
 
-  var _handleError = function(err) {
-    var validationError = self.handleError(err)
-    if (!validationError) return false
-    else { 
-      self._merge(validationErrors, validationError, prefix)
-      isValid = false
-      return true
-    }
-  }
-
-  // Run the `before` hook
+  // ====== (step I) ====== Run the `before` hook
   if (this.before) {
     try {
       this.before.call(obj)
     } catch (err) {
-      if (_handleError(err)) _doFinally()
-      else done(err)
+      if (!_handleError(err)) done(err)
+      else _runAfter()
       return
     }
   }
 
-  // Run validators for all attributes, and collect validation errors
+  // ====== (step II) ====== Run validators for all attributes, and collect validation errors
   var _attrValidationCb = function(attrName) {
     return function(err, validationErrMsg) {
       ranCount++
@@ -93,7 +93,7 @@ Validator.prototype.run =  function(obj, opts, done) {
         isValid = false
       }
 
-      if (ranCount === attrNames.length) _doFinally()
+      if (ranCount === attrNames.length) _runAfter()
     }
   }, ranCount = 0, returned = false
 
@@ -107,29 +107,29 @@ Validator.prototype.validate = function(obj, attrName, done) {
     , val = obj[attrName]
     , validator = this.validators[attrName]
 
-  var _asyncCb = function(err, validationError) {
-    if (err) _handleError(err)
-    else if (validationError) done(null, validationError)
-    else done()
+  var _handleError = function(err) {
+    var validationErrMsg = self.handleError(err)
+    if (!validationErrMsg) done(err)
+    else done(null, validationErrMsg)
   }
 
-  var _handleError = function(err) {
-    var validationError = self.handleError(err)
-    if (!validationError) done(err)
-    else done(null, validationError)
+  var _asyncCb = function(err, validationErrMsg) {
+    if (err) _handleError(err)
+    else if (validationErrMsg) done(null, validationErrMsg)
+    else done()
   }
   
   // Both async and sync validation, in case calling the function directly throws an error.
   // For asynchronous validation, errors are returned as the first argument of the callback.
   if (validator.length === 2) {
     try { validator.call(obj, val, _asyncCb) }
-    catch (err) { _handleError(err) }
+    catch (err) { return _handleError(err) }
 
   // Synchronous validation only
   } else {
-    try { validator.call(obj, val) }
+    try { validationErrMsg = validator.call(obj, val) }
     catch (err) { return _handleError(err) }
-    done()
+    done(null, validationErrMsg)
   }
 }
 

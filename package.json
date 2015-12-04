@@ -1,6 +1,6 @@
 {
   "name": "validation-pod",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A minimal library for sync/async validation. Doesn't implement any validation primitives.",
   "main": "index.js",
   "dependencies": {

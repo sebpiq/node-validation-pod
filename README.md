@@ -1,7 +1,7 @@
 node-validation-pod
 =====================
 
-All object validation libraries come bundled with their own *assertion / sanitization* primitives. Which is kind of dumb.
+All object validation libraries come bundled with their own *assertion / sanitization* primitives. Which is kind of dumb. There is a lot of great libraries such as [chai.js](http://chaijs.com) or [validator.js](https://github.com/chriso/validator.js) which could and should be used instead.
 
 **node-validation-pod** is just an empty shell for running **synchronous / asynchronous** validation on objects. It doesn't come with any functionality for validating data. Only the validation logic. This way, you can plug-in any validation library you want.
 
@@ -16,8 +16,33 @@ Implements 3 steps :
 3. **after** : check for unknown attributes. Add errors to the errors found in previous step.
 
 
-Example using chai.js
-----------------------
+Example 1 : object validation using validator.js
+---------------------------------------------------
+
+Here is a simple example on how to use **validator.js** to validate the data submitted in a user sign-up form.
+
+```javascript
+var chai = require('validator')
+  , vpod = require('validation-pod')
+
+userRegisterValidator = vpod.Validator({
+  email: function(val) { 
+    if (!validator.isEmail(val)) return 'Invalid email' 
+  },
+  password: function(val) { 
+    if (!isLength(password, 8)) return 'Password must be at least 8 characters!'
+    // ... more validation rules  
+  },
+  confirmPassword: function(val) { 
+    if (this.password !== val) return 'Passwords do not match'
+  }
+})
+
+```
+
+
+Example 2 : object validation using chai.js
+----------------------------------------------
 
 First you need to create a subclass of `Validator`:
 

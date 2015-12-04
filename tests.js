@@ -4,6 +4,7 @@ var assert = require('assert')
   , expect = chai.expect
   , vpod = require('./index')
 
+
 var ChaiValidator = function() {
   vpod.Validator.apply(this, arguments)
 }
@@ -19,9 +20,14 @@ describe('validation-pod', function() {
 
   describe('validate', function() {
 
-    var validator = new ChaiValidator({
+    var simpleValidator = new vpod.Validator({
       validSyncAttr: function(val) {},
       validAsyncAttr: function(val, done) { done() },
+      unvalidSyncAttr: function(val) { return 'dummy 1' },
+      unvalidAsyncAttr: function(val, done) { done(null, 'dummy 2') }
+    })
+
+    var chaiValidator = new ChaiValidator({
       unvalidSyncAttr: function(val) { throw new chai.AssertionError('dummy 1') },
       unvalidAsyncAttr: function(val, done) { done(new chai.AssertionError('dummy 2')) },
       unvalidAsyncAttrThrowing: function(val, done) { throw new chai.AssertionError('dummy 3') }
@@ -30,7 +36,7 @@ describe('validation-pod', function() {
     var dummyObj = {}
 
     it('shouldnt do anything if sync validation succeeds', function(done) {
-      validator.validate(dummyObj, 'validSyncAttr', function(err, result) {
+      simpleValidator.validate(dummyObj, 'validSyncAttr', function(err, result) {
         if (err) throw err
         assert.ok(!result)
         done()
@@ -38,31 +44,47 @@ describe('validation-pod', function() {
     })
 
     it('shouldnt do anything if async validation succeeds', function(done) {
-      validator.validate(dummyObj, 'validAsyncAttr', function(err, result) {
+      simpleValidator.validate(dummyObj, 'validAsyncAttr', function(err, result) {
         if (err) throw err
         assert.ok(!result)
         done()
       })
     })
 
-    it('should catch synchronous chai.AssertionErrors', function(done) {
-      validator.validate(dummyObj, 'unvalidSyncAttr', function(err, result) {
+    it('should handle synchronous validation errors returned as error message', function(done) {
+      simpleValidator.validate(dummyObj, 'unvalidSyncAttr', function(err, result) {
         if (err) throw err
         assert.equal(result, 'dummy 1')
         done()
       })
     })
 
-    it('should catch asynchronous chai.AssertionErrors', function(done) {
-      validator.validate(dummyObj, 'unvalidAsyncAttr', function(err, result) {
+    it('should handle Asynchronous validation errors returned as error message', function(done) {
+      simpleValidator.validate(dummyObj, 'unvalidAsyncAttr', function(err, result) {
         if (err) throw err
         assert.equal(result, 'dummy 2')
         done()
       })
     })
 
-    it('should catch synchronous chai.AssertionErrors with `func` declared as async', function(done) {
-      validator.validate(dummyObj, 'unvalidAsyncAttrThrowing', function(err, result) {
+    it('should catch synchronous validation errors thrown', function(done) {
+      chaiValidator.validate(dummyObj, 'unvalidSyncAttr', function(err, result) {
+        if (err) throw err
+        assert.equal(result, 'dummy 1')
+        done()
+      })
+    })
+
+    it('should catch asynchronous validation errors passed as done(validationErr)', function(done) {
+      chaiValidator.validate(dummyObj, 'unvalidAsyncAttr', function(err, result) {
+        if (err) throw err
+        assert.equal(result, 'dummy 2')
+        done()
+      })
+    })
+
+    it('should catch synchronous validation errors thrown even with `func` declared as async', function(done) {
+      chaiValidator.validate(dummyObj, 'unvalidAsyncAttrThrowing', function(err, result) {
         if (err) throw err
         assert.equal(result, 'dummy 3')
         done()
