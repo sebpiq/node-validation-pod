@@ -127,7 +127,7 @@ Validator.prototype.validate = function(obj, attrName, done) {
 
   // Synchronous validation only
   } else {
-    try { validationErrMsg = validator.call(obj, val) }
+    try { var validationErrMsg = validator.call(obj, val) }
     catch (err) { return _handleError(err) }
     done(null, validationErrMsg)
   }

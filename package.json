@@ -1,6 +1,6 @@
 {
   "name": "validation-pod",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A minimal library for sync/async validation. Doesn't implement any validation primitives.",
   "main": "index.js",
   "dependencies": {
@@ -13,7 +13,7 @@
     "underscore": "1.7.x"
   },
   "scripts": {
-    "test": "mocha tests.js"
+    "test": "mocha --check-leaks tests.js"
   },
   "repository": {
     "type": "git",
